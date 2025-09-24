@@ -226,4 +226,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - **Issues**: [GitHub Issues](https://github.com/yourname/chatdash/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourname/chatdash/discussions)
-- **Documentation**: [Wiki](https://github.com/yourname/chatdash/wiki)
+- **Documentation**: [Wiki](https://github.com/yourname/chatdash/wiki)# dashboard-pro
