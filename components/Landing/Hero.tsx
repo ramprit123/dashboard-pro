@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/UI/button';
 import { ArrowRight, MessageSquare, BarChart3 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ThemeToggle } from '@/components/UI/ThemeToggle';
 
 export function Hero() {
   const router = useRouter();
@@ -24,6 +25,11 @@ export function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Theme Toggle - Top Right */}
+      <div className="absolute top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
+
       {/* Animated Background */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20"
