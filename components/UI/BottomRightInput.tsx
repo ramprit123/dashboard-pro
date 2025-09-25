@@ -35,12 +35,46 @@ export function BottomRightInput() {
   const [dimensions, setDimensions] = useState<Dimensions>({ width: 320, height: 200 });
   const [isSticky, setIsSticky] = useState(true); // Start sticky
   const [mounted, setMounted] = useState(false); // Fix hydration
+  const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
   const { sendMessage, isLoading } = useChat();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
+
+    // Set initial screen size and responsive dimensions
+    const updateScreenSize = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      setScreenSize({ width, height });
+
+      // Responsive default dimensions based on screen size
+      if (width >= 1536) {
+        // 2xl screens
+        setDimensions((prev) => ({
+          width: Math.min(prev.width, Math.max(400, width * 0.25)),
+          height: Math.min(prev.height, Math.max(300, height * 0.4)),
+        }));
+      } else if (width >= 1280) {
+        // xl screens
+        setDimensions((prev) => ({
+          width: Math.min(prev.width, Math.max(360, width * 0.28)),
+          height: Math.min(prev.height, Math.max(250, height * 0.35)),
+        }));
+      } else if (width >= 1024) {
+        // lg screens
+        setDimensions((prev) => ({
+          width: Math.min(prev.width, 320),
+          height: Math.min(prev.height, 200),
+        }));
+      }
+    };
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
   useEffect(() => {
