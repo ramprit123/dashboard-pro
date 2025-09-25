@@ -21,10 +21,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const dashboardData = await request.json();
-    
-    // TODO: Validate and save dashboard to database
-    console.log('Saving dashboard:', dashboardData);
-    
+
     const savedDashboard = {
       ...dashboardData,
       id: dashboardData.id || `dashboard_${Date.now()}`,
@@ -34,9 +31,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(savedDashboard);
   } catch (error) {
     console.error('Dashboard save error:', error);
-    return NextResponse.json(
-      { error: 'Failed to save dashboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to save dashboard' }, { status: 500 });
   }
 }

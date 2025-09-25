@@ -31,24 +31,6 @@ export function ChatMetrics() {
 
   const cards = [
     {
-      id: 'messages-by-hour',
-      title: 'Messages by Hour',
-      type: 'chart',
-      content: (
-        <GoogleChartWrapper
-          chartType="LineChart"
-          data={chartData}
-          options={{
-            title: 'Message Distribution',
-            hAxis: { title: 'Hour of Day' },
-            vAxis: { title: 'Message Count' },
-          }}
-          height="100%"
-          width="100%"
-        />
-      ),
-    },
-    {
       id: 'response-times',
       title: 'Response Times',
       type: 'chart',
@@ -57,8 +39,26 @@ export function ChatMetrics() {
           chartType="ColumnChart"
           data={responseTimeData}
           options={{
-            title: 'Response Performance',
+            title: '',
             vAxis: { title: 'Time (ms)' },
+          }}
+          height="100%"
+          width="100%"
+        />
+      ),
+    },
+    {
+      id: 'messages-by-hour',
+      title: 'Messages by Hour',
+      type: 'chart',
+      content: (
+        <GoogleChartWrapper
+          chartType="LineChart"
+          data={chartData}
+          options={{
+            title: '',
+            hAxis: { title: 'Hour of Day' },
+            vAxis: { title: 'Message Count' },
           }}
           height="100%"
           width="100%"
