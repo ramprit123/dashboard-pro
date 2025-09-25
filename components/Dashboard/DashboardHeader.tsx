@@ -1,20 +1,21 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { 
+import { Button } from '@/components/UI/button';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/UI/select';
 import { Download, Edit, Save, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useDashboard } from '@/hooks/useDashboard';
 
 export function DashboardHeader() {
   const router = useRouter();
-  const { currentDashboard, dashboards, selectDashboard, saveDashboard, exportDashboard } = useDashboard();
+  const { currentDashboard, dashboards, selectDashboard, saveDashboard, exportDashboard } =
+    useDashboard();
 
   return (
     <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -37,34 +38,19 @@ export function DashboardHeader() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/dashboard/builder')}
-            >
+            <Button variant="outline" size="sm" onClick={() => router.push('/dashboard/builder')}>
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={saveDashboard}
-            >
+            <Button variant="outline" size="sm" onClick={saveDashboard}>
               <Save className="h-4 w-4 mr-2" />
               Save
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={exportDashboard}
-            >
+            <Button variant="outline" size="sm" onClick={exportDashboard}>
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            <Button
-              size="sm"
-              onClick={() => router.push('/dashboard/builder')}
-            >
+            <Button size="sm" onClick={() => router.push('/dashboard/builder')}>
               <Plus className="h-4 w-4 mr-2" />
               New
             </Button>

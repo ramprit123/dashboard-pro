@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/UI/card';
 import { MessageSquare, Users, TrendingUp, Clock } from 'lucide-react';
 
 const metrics = [
@@ -36,9 +36,7 @@ export function DashboardMetrics() {
       {metrics.map((metric, index) => (
         <Card key={index}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {metric.title}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{metric.title}</CardTitle>
             <metric.icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>

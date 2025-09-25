@@ -2,6 +2,27 @@
 
 import { create } from 'zustand';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAnalytics } from '@/contexts/AnalyticsContext';
+
+interface ChartData {
+  chartType: 'ColumnChart' | 'LineChart' | 'PieChart' | 'BarChart' | 'AreaChart';
+  data: any[][];
+  options: any;
+  title: string;
+}
+
+interface TableData {
+  headers: string[];
+  rows: any[][];
+  title: string;
+}
+
+interface KPI {
+  label: string;
+  value: string | number;
+  change?: string;
+  trend?: 'up' | 'down' | 'neutral';
+}
 
 interface Message {
   id: string;
@@ -9,6 +30,9 @@ interface Message {
   timestamp: string;
   isUser?: boolean;
   conversationId?: string;
+  chartData?: ChartData;
+  tableData?: TableData;
+  kpis?: KPI[];
 }
 
 interface ChatState {
@@ -31,6 +55,7 @@ const useChatStore = create<ChatState>((set) => ({
 export function useChat() {
   const queryClient = useQueryClient();
   const { messages, addMessage, setMessages, currentConversationId } = useChatStore();
+  const { updateAnalytics } = useAnalytics();
 
   // Fetch chat history
   const { isLoading: isLoadingHistory } = useQuery({
@@ -65,10 +90,14 @@ export function useChat() {
       });
 
       if (!response.ok) throw new Error('Failed to send message');
-      return response.json();
+      const data = await response.json();
+
+      // Store the original query for analytics context
+      data.originalQuery = message;
+      return data;
     },
     onSuccess: (data) => {
-      // Add bot response
+      // Add bot response to chat (simplified for left panel)
       const botMessage: Message = {
         id: data.id,
         message: data.message,
@@ -77,6 +106,11 @@ export function useChat() {
         conversationId: data.conversationId,
       };
       addMessage(botMessage);
+
+      // Update analytics display in right panel
+      if (data.chartData || data.tableData || data.kpis) {
+        updateAnalytics(data.originalQuery, data);
+      }
     },
     onError: (error) => {
       console.error('Failed to send message:', error);
@@ -136,7 +170,7 @@ export function useChat() {
                 // Note: This is a simplified version - in production, you'd want to update the specific message
                 setMessages([
                   ...messages.slice(0, -1),
-                  { ...streamMessage, message: streamedContent.trim() }
+                  { ...streamMessage, message: streamedContent.trim() },
                 ]);
               }
             } catch (e) {

@@ -1,9 +1,11 @@
 'use client';
 
 import { useChat } from '@/hooks/useChat';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/UI/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/UI/card';
 import { GoogleChartWrapper } from '../Chart/GoogleChartWrapper';
+import { CartDataWidget } from './CartDataWidget';
+import { ApiStatusWidget } from './ApiStatusWidget';
 
 export function ChatMetrics() {
   const { messages } = useChat();
@@ -155,6 +157,16 @@ export function ChatMetrics() {
     <div className="h-full">
       <ScrollArea className="h-full">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 gap-4 p-4 md:p-6">
+          {/* API Status Widget */}
+          <div className="md:col-span-1 xl:col-span-1 2xl:col-span-1">
+            <ApiStatusWidget />
+          </div>
+
+          {/* Cart Data Widget */}
+          <div className="md:col-span-1 xl:col-span-2 2xl:col-span-1">
+            <CartDataWidget />
+          </div>
+
           {cards.map((card) => (
             <Card
               key={card.id}

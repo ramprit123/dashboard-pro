@@ -1,9 +1,14 @@
+'use client';
+
 import { Suspense } from 'react';
 import { ChatInterface } from '@/components/Chat/ChatInterface';
 import { BottomRightInput } from '@/components/UI/BottomRightInput';
-import { ChatMetrics } from '@/components/Chat/ChatMetrics';
+import { AnalyticsDisplay } from '@/components/Chat/AnalyticsDisplay';
+import { AnalyticsProvider, useAnalytics } from '@/contexts/AnalyticsContext';
 
-export default function ChatPage() {
+function ChatPageContent() {
+  const { currentAnalytics } = useAnalytics();
+
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-background">
       {/* Left Column - Chat Interface */}
@@ -13,13 +18,21 @@ export default function ChatPage() {
         </Suspense>
       </div>
 
-      {/* Right Column - Metrics */}
+      {/* Right Column - Analytics Display */}
       <div className="flex-1 relative h-1/2 lg:h-full">
-        <ChatMetrics />
+        <AnalyticsDisplay analyticsData={currentAnalytics} />
       </div>
 
       {/* Fixed Input */}
       <BottomRightInput />
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <AnalyticsProvider>
+      <ChatPageContent />
+    </AnalyticsProvider>
   );
 }
