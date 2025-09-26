@@ -57,6 +57,17 @@ export function QuerySuggestions({ onQuerySelect }: QuerySuggestionsProps) {
       color: 'bg-red-50 border-red-200 text-red-800',
       queries: ['Show priority analysis', 'Analyze escalation rates', 'Urgent calls breakdown'],
     },
+    {
+      category: 'Call Records',
+      icon: BarChart3,
+      color: 'bg-gray-50 border-gray-200 text-gray-800',
+      queries: [
+        'Show all call records',
+        'Call details with filters',
+        'Agent performance data',
+        'Test table',
+      ],
+    },
   ];
 
   return (

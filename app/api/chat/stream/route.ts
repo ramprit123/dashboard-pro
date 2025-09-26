@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { OpenRouterClient, createCartAnalysisPrompt } from '@/lib/openrouter';
-import { sampleCartData, getCartAnalytics } from '@/lib/cart-data';
+import { sampleCallCenterData, getCallCenterAnalytics } from '@/lib/cart-data';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,10 +18,10 @@ export async function POST(request: NextRequest) {
     const client = new OpenRouterClient(apiKey);
 
     // Prepare data for AI analysis
-    const cartAnalytics = getCartAnalytics();
+    const callCenterAnalytics = getCallCenterAnalytics();
     const dataContext = {
-      carts: sampleCartData,
-      analytics: cartAnalytics,
+      calls: sampleCallCenterData,
+      analytics: callCenterAnalytics,
     };
 
     const messages = includeCartData

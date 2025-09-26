@@ -12,6 +12,7 @@ interface ChartData {
 interface TableData {
   headers: string[];
   rows: any[][];
+  data: Record<string, any>[];
   title: string;
 }
 
@@ -33,14 +34,17 @@ interface AnalyticsData {
 
 interface AnalyticsContextType {
   currentAnalytics: AnalyticsData | null;
+  analyticsHistory: AnalyticsData[];
   setCurrentAnalytics: (data: AnalyticsData | null) => void;
   updateAnalytics: (query: string, response: any) => void;
+  selectAnalytics: (analytics: AnalyticsData) => void;
 }
 
 const AnalyticsContext = createContext<AnalyticsContextType | undefined>(undefined);
 
 export function AnalyticsProvider({ children }: { children: ReactNode }) {
   const [currentAnalytics, setCurrentAnalytics] = useState<AnalyticsData | null>(null);
+  const [analyticsHistory, setAnalyticsHistory] = useState<AnalyticsData[]>([]);
 
   const updateAnalytics = (query: string, response: any) => {
     const analyticsData: AnalyticsData = {
@@ -51,15 +55,31 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
       timestamp: response.timestamp,
       query: query,
     };
+
     setCurrentAnalytics(analyticsData);
+
+    // Add to history if it has visual data
+    if (analyticsData.chartData || analyticsData.tableData || analyticsData.kpis) {
+      setAnalyticsHistory((prev) => {
+        // Remove duplicate if exists and add to front
+        const filtered = prev.filter((item) => item.query !== query);
+        return [analyticsData, ...filtered].slice(0, 10); // Keep last 10
+      });
+    }
+  };
+
+  const selectAnalytics = (analytics: AnalyticsData) => {
+    setCurrentAnalytics(analytics);
   };
 
   return (
     <AnalyticsContext.Provider
       value={{
         currentAnalytics,
+        analyticsHistory,
         setCurrentAnalytics,
         updateAnalytics,
+        selectAnalytics,
       }}
     >
       {children}

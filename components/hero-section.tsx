@@ -39,13 +39,13 @@ export default function HeroSection() {
       <header>
         <nav
           data-state={menuState && 'active'}
-          className="fixed z-20 w-full border-b border-dashed bg-white backdrop-blur md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent"
+          className="fixed z-20 w-full bg-background backdrop-blur md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent"
         >
-          <div className="m-auto max-w-5xl px-6">
+          <div className="m-auto max-w-full container px-6">
             <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
               <div className="flex w-full justify-between lg:w-auto">
                 <Link href="/" aria-label="home" className="flex items-center space-x-2">
-                  <Logo />
+                  <Image src={'/logoipsum.png'} alt="logo" height={100} width={160} />
                 </Link>
 
                 <div className="flex items-center gap-4">

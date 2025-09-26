@@ -158,6 +158,7 @@ export interface ChartData {
 export interface TableData {
   headers: string[];
   rows: any[][];
+  data: Record<string, any>[]; // Array of objects for enhanced table functionality
   title: string;
 }
 
@@ -238,11 +239,63 @@ export function getCallCenterAnalytics() {
     escalationRate: (escalatedCalls / totalCalls) * 100,
   };
 }
+// Validation function for table data
+function validateTableData(tableData: TableData): TableData {
+  if (!tableData.data || !Array.isArray(tableData.data)) {
+    console.warn('Table data is missing or not an array:', tableData);
+    tableData.data = [];
+  }
+  if (!tableData.headers || !Array.isArray(tableData.headers)) {
+    console.warn('Table headers are missing or not an array:', tableData);
+    tableData.headers = [];
+  }
+  return tableData;
+}
+
 export function generateChartAndTableData(
   query: string,
   analytics: ReturnType<typeof getCallCenterAnalytics>
 ): AnalyticsResponse {
   const lowerQuery = query.toLowerCase();
+
+  // Test query for debugging
+  if (lowerQuery.includes('test table')) {
+    return {
+      chartData: {
+        chartType: 'ColumnChart',
+        title: 'Test Chart',
+        data: [
+          ['Item', 'Count'],
+          ['Test 1', 10],
+          ['Test 2', 20],
+        ],
+        options: {
+          title: 'Test Chart',
+          vAxis: { title: 'Count' },
+          chartArea: { width: '80%', height: '70%' },
+        },
+      },
+      tableData: {
+        title: 'Test Table',
+        headers: ['Name', 'Value', 'Status'],
+        rows: [
+          ['Test Item 1', '100', 'Active'],
+          ['Test Item 2', '200', 'Inactive'],
+          ['Test Item 3', '300', 'Pending'],
+        ],
+        data: [
+          { Name: 'Test Item 1', Value: '100', Status: 'Active', ValueNumber: 100 },
+          { Name: 'Test Item 2', Value: '200', Status: 'Inactive', ValueNumber: 200 },
+          { Name: 'Test Item 3', Value: '300', Status: 'Pending', ValueNumber: 300 },
+        ],
+      },
+      textResponse: 'This is a test response with both chart and table data.',
+      kpis: [
+        { label: 'Test KPI 1', value: '100', trend: 'up' as const },
+        { label: 'Test KPI 2', value: '200', trend: 'down' as const },
+      ],
+    };
+  }
 
   // Call Center KPIs
   const kpis = [
@@ -274,6 +327,22 @@ export function generateChartAndTableData(
       ([, a], [, b]) => b - a
     );
 
+    const tableData = validateTableData({
+      title: 'Department Performance',
+      headers: ['Department', 'Total Calls', 'Percentage'],
+      rows: departmentData.map(([department, calls]) => [
+        department,
+        calls,
+        `${((calls / analytics.totalCalls) * 100).toFixed(1)}%`,
+      ]),
+      data: departmentData.map(([department, calls]) => ({
+        Department: department,
+        'Total Calls': calls,
+        Percentage: `${((calls / analytics.totalCalls) * 100).toFixed(1)}%`,
+        PercentageValue: (calls / analytics.totalCalls) * 100, // For sorting
+      })),
+    });
+
     return {
       chartData: {
         chartType: 'PieChart',
@@ -286,15 +355,7 @@ export function generateChartAndTableData(
           chartArea: { width: '90%', height: '80%' },
         },
       },
-      tableData: {
-        title: 'Department Performance',
-        headers: ['Department', 'Total Calls', 'Percentage'],
-        rows: departmentData.map(([department, calls]) => [
-          department,
-          calls,
-          `${((calls / analytics.totalCalls) * 100).toFixed(1)}%`,
-        ]),
-      },
+      tableData,
       textResponse: `📊 **Department Analysis:**\n\nCall volume by department:\n${departmentData
         .map(([dept, calls]) => `• ${dept}: ${calls} calls`)
         .join(
@@ -333,6 +394,12 @@ export function generateChartAndTableData(
           count,
           `${((count / analytics.totalCalls) * 100).toFixed(1)}%`,
         ]),
+        data: categoryData.map(([category, count]) => ({
+          Category: category,
+          Count: count,
+          Percentage: `${((count / analytics.totalCalls) * 100).toFixed(1)}%`,
+          PercentageValue: (count / analytics.totalCalls) * 100, // For sorting
+        })),
       },
       textResponse: `📋 **Category Analysis:**\n\nTop call categories:\n${categoryData
         .slice(0, 3)
@@ -369,6 +436,18 @@ export function generateChartAndTableData(
           const percentage = ((count / analytics.totalCalls) * 100).toFixed(1);
           const escalationRate = priority === 'urgent' ? '45%' : priority === 'high' ? '25%' : '5%';
           return [priority, count, `${percentage}%`, escalationRate];
+        }),
+        data: priorityData.map(([priority, count]) => {
+          const percentage = ((count / analytics.totalCalls) * 100).toFixed(1);
+          const escalationRateValue = priority === 'urgent' ? 45 : priority === 'high' ? 25 : 5;
+          return {
+            Priority: priority,
+            Count: count,
+            Percentage: `${percentage}%`,
+            PercentageValue: parseFloat(percentage),
+            'Escalation Rate': `${escalationRateValue}%`,
+            EscalationRateValue: escalationRateValue,
+          };
         }),
       },
       textResponse: `🚨 **Priority Analysis:**\n\n• Escalation Rate: ${analytics.escalationRate.toFixed(1)}%\n• High Priority Calls: ${analytics.priorityBreakdown.high || 0}\n• Urgent Calls: ${analytics.priorityBreakdown.urgent || 0}\n\n**Action Items:**\n• Monitor urgent calls closely\n• Ensure proper escalation procedures\n• Review high-priority resolution times`,
@@ -432,6 +511,44 @@ export function generateChartAndTableData(
             analytics.avgSatisfaction >= 4.0 ? '✅ Good' : '⚠️ Needs Improvement',
           ],
         ],
+        data: [
+          {
+            Metric: 'First Call Resolution',
+            Value: `${analytics.firstCallResolutionRate.toFixed(1)}%`,
+            ValueNumber: analytics.firstCallResolutionRate,
+            Target: '80%',
+            TargetNumber: 80,
+            Status: analytics.firstCallResolutionRate >= 80 ? '✅ Good' : '⚠️ Needs Improvement',
+            StatusValue: analytics.firstCallResolutionRate >= 80 ? 1 : 0,
+          },
+          {
+            Metric: 'Resolution Rate',
+            Value: `${analytics.resolutionRate.toFixed(1)}%`,
+            ValueNumber: analytics.resolutionRate,
+            Target: '95%',
+            TargetNumber: 95,
+            Status: analytics.resolutionRate >= 95 ? '✅ Good' : '⚠️ Needs Improvement',
+            StatusValue: analytics.resolutionRate >= 95 ? 1 : 0,
+          },
+          {
+            Metric: 'Avg Handle Time',
+            Value: `${analytics.avgHandleTime.toFixed(1)}m`,
+            ValueNumber: analytics.avgHandleTime,
+            Target: '12m',
+            TargetNumber: 12,
+            Status: analytics.avgHandleTime <= 12 ? '✅ Good' : '⚠️ Above Target',
+            StatusValue: analytics.avgHandleTime <= 12 ? 1 : 0,
+          },
+          {
+            Metric: 'Customer Satisfaction',
+            Value: `${analytics.avgSatisfaction.toFixed(1)}/5`,
+            ValueNumber: analytics.avgSatisfaction,
+            Target: '4.0',
+            TargetNumber: 4.0,
+            Status: analytics.avgSatisfaction >= 4.0 ? '✅ Good' : '⚠️ Needs Improvement',
+            StatusValue: analytics.avgSatisfaction >= 4.0 ? 1 : 0,
+          },
+        ],
       },
       textResponse: `📈 **Performance Insights:**\n\n• First Call Resolution: ${analytics.firstCallResolutionRate.toFixed(1)}%\n• Average Handle Time: ${analytics.avgHandleTime.toFixed(1)} minutes\n• Customer Satisfaction: ${analytics.avgSatisfaction.toFixed(1)}/5\n• Resolution Rate: ${analytics.resolutionRate.toFixed(1)}%\n\n**Recommendations:** Focus on improving first call resolution to reduce handle time and increase satisfaction.`,
       kpis,
@@ -479,8 +596,186 @@ export function generateChartAndTableData(
           resolved,
           `${((resolved / incoming) * 100).toFixed(1)}%`,
         ]),
+        data: timeData.map(([hour, incoming, resolved]) => ({
+          Hour: hour,
+          Incoming: incoming,
+          Resolved: resolved,
+          'Resolution Rate': `${((resolved / incoming) * 100).toFixed(1)}%`,
+          ResolutionRateValue: (resolved / incoming) * 100,
+        })),
       },
       textResponse: `📈 **Time-based Trends:**\n\n• Peak hours: 12 PM - 1 PM\n• Best resolution rate: 11 AM (85.7%)\n• Lowest volume: 4 PM\n\n**Insights:** Lunch hours show highest call volume. Consider staffing adjustments during peak times.`,
+      kpis,
+    };
+  }
+
+  // Agent Performance Analysis
+  if (
+    lowerQuery.includes('agent performance') ||
+    lowerQuery.includes('agent data') ||
+    lowerQuery.includes('agent metrics')
+  ) {
+    const agentPerformance = sampleCallCenterData.reduce(
+      (acc, call) => {
+        if (!acc[call.agentId]) {
+          acc[call.agentId] = {
+            agentId: call.agentId,
+            agentName: call.agentName,
+            department: call.department,
+            totalCalls: 0,
+            resolvedCalls: 0,
+            totalDuration: 0,
+            satisfactionSum: 0,
+            satisfactionCount: 0,
+            fcrCount: 0,
+          };
+        }
+
+        acc[call.agentId].totalCalls++;
+        if (call.status === 'resolved') acc[call.agentId].resolvedCalls++;
+        if (call.duration) acc[call.agentId].totalDuration += call.duration;
+        if (call.customerSatisfaction) {
+          acc[call.agentId].satisfactionSum += call.customerSatisfaction;
+          acc[call.agentId].satisfactionCount++;
+        }
+        if (call.firstCallResolution) acc[call.agentId].fcrCount++;
+
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+
+    const agentData = Object.values(agentPerformance).map((agent: any) => ({
+      Agent: agent.agentName,
+      Department: agent.department,
+      'Total Calls': agent.totalCalls,
+      'Resolved Calls': agent.resolvedCalls,
+      'Resolution Rate': `${((agent.resolvedCalls / agent.totalCalls) * 100).toFixed(1)}%`,
+      ResolutionRateValue: (agent.resolvedCalls / agent.totalCalls) * 100,
+      'Avg Handle Time': `${(agent.totalDuration / agent.totalCalls).toFixed(1)}m`,
+      AvgHandleTimeValue: agent.totalDuration / agent.totalCalls,
+      'Customer Satisfaction':
+        agent.satisfactionCount > 0
+          ? `${(agent.satisfactionSum / agent.satisfactionCount).toFixed(1)}/5`
+          : 'N/A',
+      SatisfactionValue:
+        agent.satisfactionCount > 0 ? agent.satisfactionSum / agent.satisfactionCount : 0,
+      'FCR Rate': `${((agent.fcrCount / agent.totalCalls) * 100).toFixed(1)}%`,
+      FCRRateValue: (agent.fcrCount / agent.totalCalls) * 100,
+    }));
+
+    return {
+      chartData: {
+        chartType: 'ColumnChart',
+        title: 'Agent Performance - Total Calls',
+        data: [
+          ['Agent', 'Total Calls'],
+          ...agentData.map((agent) => [agent.Agent, agent['Total Calls']]),
+        ],
+        options: {
+          title: 'Total Calls by Agent',
+          vAxis: { title: 'Number of Calls' },
+          hAxis: { title: 'Agent' },
+          colors: ['#4285F4'],
+          chartArea: { width: '80%', height: '70%' },
+        },
+      },
+      tableData: {
+        title: 'Agent Performance Metrics',
+        headers: [
+          'Agent',
+          'Department',
+          'Total Calls',
+          'Resolved Calls',
+          'Resolution Rate',
+          'Avg Handle Time',
+          'Customer Satisfaction',
+          'FCR Rate',
+        ],
+        rows: agentData.map((agent) => [
+          agent.Agent,
+          agent.Department,
+          agent['Total Calls'],
+          agent['Resolved Calls'],
+          agent['Resolution Rate'],
+          agent['Avg Handle Time'],
+          agent['Customer Satisfaction'],
+          agent['FCR Rate'],
+        ]),
+        data: agentData,
+      },
+      textResponse: `👥 **Agent Performance Analysis:**\n\n• Total Agents: ${agentData.length}\n• Best Resolution Rate: ${Math.max(...agentData.map((a) => a.ResolutionRateValue)).toFixed(1)}%\n• Best FCR Rate: ${Math.max(...agentData.map((a) => a.FCRRateValue)).toFixed(1)}%\n\n**Use the table to:**\n• Sort by any performance metric\n• Filter by department\n• Compare agent performance\n• Identify top performers`,
+      kpis,
+    };
+  }
+
+  // Call Details/Records Analysis
+  if (
+    lowerQuery.includes('call details') ||
+    lowerQuery.includes('call records') ||
+    lowerQuery.includes('all calls') ||
+    lowerQuery.includes('call list')
+  ) {
+    return {
+      chartData: {
+        chartType: 'ColumnChart',
+        title: 'Call Status Distribution',
+        data: [
+          ['Status', 'Count'],
+          ['Resolved', analytics.resolvedCalls],
+          ['In Progress', analytics.inProgressCalls],
+          ['Escalated', analytics.escalatedCalls],
+        ],
+        options: {
+          title: 'Call Status Distribution',
+          vAxis: { title: 'Number of Calls' },
+          colors: ['#34A853', '#FBBC04', '#EA4335'],
+          chartArea: { width: '80%', height: '70%' },
+        },
+      },
+      tableData: {
+        title: 'Call Center Records',
+        headers: [
+          'Call ID',
+          'Agent',
+          'Department',
+          'Category',
+          'Priority',
+          'Status',
+          'Duration',
+          'Satisfaction',
+          'FCR',
+        ],
+        rows: sampleCallCenterData.map((call) => [
+          call.id,
+          call.agentName,
+          call.department,
+          call.category,
+          call.priority,
+          call.status,
+          call.duration ? `${call.duration}m` : 'N/A',
+          call.customerSatisfaction ? `${call.customerSatisfaction}/5` : 'N/A',
+          call.firstCallResolution ? 'Yes' : 'No',
+        ]),
+        data: sampleCallCenterData.map((call) => ({
+          'Call ID': call.id,
+          Agent: call.agentName,
+          Department: call.department,
+          Category: call.category,
+          Priority: call.priority,
+          Status: call.status,
+          Duration: call.duration ? `${call.duration}m` : 'N/A',
+          DurationValue: call.duration || 0,
+          Satisfaction: call.customerSatisfaction ? `${call.customerSatisfaction}/5` : 'N/A',
+          SatisfactionValue: call.customerSatisfaction || 0,
+          FCR: call.firstCallResolution ? 'Yes' : 'No',
+          FCRValue: call.firstCallResolution ? 1 : 0,
+          'Start Time': new Date(call.startTime).toLocaleString(),
+          'End Time': call.endTime ? new Date(call.endTime).toLocaleString() : 'N/A',
+          Notes: call.notes,
+        })),
+      },
+      textResponse: `📋 **Call Records Analysis:**\n\n• Total Records: ${sampleCallCenterData.length}\n• Resolved: ${analytics.resolvedCalls}\n• In Progress: ${analytics.inProgressCalls}\n• Escalated: ${analytics.escalatedCalls}\n\n**Use the table filters to:**\n• Filter by department, status, or priority\n• Search for specific agents or call IDs\n• Sort by duration, satisfaction, or any column\n• View detailed call information`,
       kpis,
     };
   }
@@ -516,6 +811,44 @@ export function generateChartAndTableData(
         ['Avg Handle Time', `${analytics.avgHandleTime.toFixed(1)} minutes`],
         ['Customer Satisfaction', `${analytics.avgSatisfaction.toFixed(1)}/5`],
         ['First Call Resolution', `${analytics.firstCallResolutionRate.toFixed(1)}%`],
+      ],
+      data: [
+        { Metric: 'Total Calls', Value: analytics.totalCalls, ValueNumber: analytics.totalCalls },
+        {
+          Metric: 'Resolved Calls',
+          Value: analytics.resolvedCalls,
+          ValueNumber: analytics.resolvedCalls,
+        },
+        {
+          Metric: 'In Progress',
+          Value: analytics.inProgressCalls,
+          ValueNumber: analytics.inProgressCalls,
+        },
+        {
+          Metric: 'Escalated Calls',
+          Value: analytics.escalatedCalls,
+          ValueNumber: analytics.escalatedCalls,
+        },
+        {
+          Metric: 'Resolution Rate',
+          Value: `${analytics.resolutionRate.toFixed(1)}%`,
+          ValueNumber: analytics.resolutionRate,
+        },
+        {
+          Metric: 'Avg Handle Time',
+          Value: `${analytics.avgHandleTime.toFixed(1)} minutes`,
+          ValueNumber: analytics.avgHandleTime,
+        },
+        {
+          Metric: 'Customer Satisfaction',
+          Value: `${analytics.avgSatisfaction.toFixed(1)}/5`,
+          ValueNumber: analytics.avgSatisfaction,
+        },
+        {
+          Metric: 'First Call Resolution',
+          Value: `${analytics.firstCallResolutionRate.toFixed(1)}%`,
+          ValueNumber: analytics.firstCallResolutionRate,
+        },
       ],
     },
     textResponse: `📞 **Call Center Dashboard Overview:**\n\n**Key Metrics:**\n• Total Calls: ${analytics.totalCalls}\n• Resolution Rate: ${analytics.resolutionRate.toFixed(1)}%\n• Avg Handle Time: ${analytics.avgHandleTime.toFixed(1)} minutes\n• Customer Satisfaction: ${analytics.avgSatisfaction.toFixed(1)}/5\n\n**Ask me about:**\n• "Show department breakdown"\n• "Analyze call categories"\n• "Performance metrics"\n• "Priority analysis"\n• "Hourly call trends"`,

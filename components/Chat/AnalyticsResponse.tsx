@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/UI/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/UI/tabs';
 import { GoogleChartWrapper } from '../Chart/GoogleChartWrapper';
+import { DataTable } from '@/components/UI/data-table';
 import { BarChart3, Table, MessageSquare, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface ChartData {
@@ -16,6 +17,7 @@ interface ChartData {
 interface TableData {
   headers: string[];
   rows: any[][];
+  data: Record<string, any>[];
   title: string;
 }
 

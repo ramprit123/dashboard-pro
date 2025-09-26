@@ -121,6 +121,14 @@ export async function POST(request: NextRequest) {
       // For call center data queries, always use local analysis with chart/table generation
       analyticsResponse = generateChartAndTableData(message, callCenterAnalytics);
 
+      // Debug logging
+      // console.log('Generated analytics response:', {
+      //   hasChartData: !!analyticsResponse.chartData,
+      //   hasTableData: !!analyticsResponse.tableData,
+      //   tableDataLength: analyticsResponse.tableData?.data?.length || 0,
+      //   tableHeaders: analyticsResponse.tableData?.headers || [],
+      // });
+
       // Optionally enhance with AI if available
       if (apiKey) {
         try {

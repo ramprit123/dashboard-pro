@@ -1,20 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/UI/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/UI/tabs';
-import { Badge } from '@/components/UI/badge';
 import { ScrollArea } from '@/components/UI/scroll-area';
-import { GoogleChartWrapper } from '../Chart/GoogleChartWrapper';
+import { SimpleTable } from '@/components/UI/simple-table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/UI/tabs';
 import {
   BarChart3,
-  Table,
   MessageSquare,
-  TrendingUp,
-  TrendingDown,
   Minus,
   Sparkles,
+  Table,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { GoogleChartWrapper } from '../Chart/GoogleChartWrapper';
 
 interface ChartData {
   chartType: 'ColumnChart' | 'LineChart' | 'PieChart' | 'BarChart' | 'AreaChart';
@@ -26,6 +26,7 @@ interface ChartData {
 interface TableData {
   headers: string[];
   rows: any[][];
+  data: Record<string, any>[];
   title: string;
 }
 
@@ -54,8 +55,14 @@ export function AnalyticsDisplay({ analyticsData }: AnalyticsDisplayProps) {
 
   useEffect(() => {
     if (analyticsData) {
-      // Auto-switch to chart tab if chart data is available
-      if (analyticsData.chartData) {
+      // Auto-switch to table tab if table data is available, otherwise chart, otherwise overview
+      if (
+        analyticsData.tableData &&
+        analyticsData.tableData.data &&
+        analyticsData.tableData.data.length > 0
+      ) {
+        setActiveTab('table');
+      } else if (analyticsData.chartData) {
         setActiveTab('chart');
       } else {
         setActiveTab('overview');
@@ -93,15 +100,16 @@ export function AnalyticsDisplay({ analyticsData }: AnalyticsDisplayProps) {
             <Sparkles className="h-8 w-8 text-muted-foreground" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">Analytics Dashboard</h3>
+            <h3 className="text-lg font-semibold">Call Center Analytics Dashboard</h3>
             <p className="text-muted-foreground">
               Ask a question to see charts, tables, and insights here
             </p>
           </div>
           <div className="text-sm text-muted-foreground space-y-1">
             <p>Try asking:</p>
-            <p className="font-mono bg-muted px-2 py-1 rounded">"Show category breakdown"</p>
-            <p className="font-mono bg-muted px-2 py-1 rounded">"Analyze revenue trends"</p>
+            <p className="font-mono bg-muted px-2 py-1 rounded">"Show department breakdown"</p>
+            <p className="font-mono bg-muted px-2 py-1 rounded">"Analyze performance metrics"</p>
+            <p className="font-mono bg-muted px-2 py-1 rounded">"Show call categories"</p>
           </div>
         </div>
       </div>
@@ -161,11 +169,15 @@ export function AnalyticsDisplay({ analyticsData }: AnalyticsDisplayProps) {
           {/* Main Analytics Content */}
           <Card className="flex-1">
             {hasVisualData ? (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="h-full flex flex-col gap-3"
+              >
                 <CardHeader className="pb-3 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">Analytics Results</CardTitle>
-                    <TabsList className="grid w-fit grid-cols-auto">
+                    <TabsList className="flex w-fit">
                       {tabsAvailable.map((tab) => (
                         <TabsTrigger
                           key={tab.id}
@@ -183,9 +195,11 @@ export function AnalyticsDisplay({ analyticsData }: AnalyticsDisplayProps) {
                 <CardContent className="flex-1 min-h-0">
                   {/* Overview Tab */}
                   <TabsContent value="overview" className="mt-0 h-full">
-                    <div className="prose prose-sm max-w-none dark:prose-invert h-full overflow-y-auto">
-                      <div className="whitespace-pre-wrap">{analyticsData.message}</div>
-                    </div>
+                    <ScrollArea className="h-full">
+                      <div className="prose prose-sm max-w-none dark:prose-invert p-4">
+                        <div className="whitespace-pre-wrap">{analyticsData.message}</div>
+                      </div>
+                    </ScrollArea>
                   </TabsContent>
 
                   {/* Chart Tab */}
@@ -195,15 +209,17 @@ export function AnalyticsDisplay({ analyticsData }: AnalyticsDisplayProps) {
                         <h3 className="text-lg font-semibold mb-4 flex-shrink-0">
                           {analyticsData.chartData.title}
                         </h3>
-                        <div className="flex-1 min-h-[400px]">
-                          <GoogleChartWrapper
-                            chartType={analyticsData.chartData.chartType}
-                            data={analyticsData.chartData.data}
-                            options={analyticsData.chartData.options}
-                            width="100%"
-                            height="100%"
-                          />
-                        </div>
+                        <ScrollArea className="flex-1">
+                          <div className="min-h-[400px] p-4">
+                            <GoogleChartWrapper
+                              chartType={analyticsData.chartData.chartType}
+                              data={analyticsData.chartData.data}
+                              options={analyticsData.chartData.options}
+                              width="100%"
+                              height="400px"
+                            />
+                          </div>
+                        </ScrollArea>
                       </div>
                     </TabsContent>
                   )}
@@ -211,37 +227,24 @@ export function AnalyticsDisplay({ analyticsData }: AnalyticsDisplayProps) {
                   {/* Table Tab */}
                   {analyticsData.tableData && (
                     <TabsContent value="table" className="mt-0 h-full">
-                      <div className="h-full flex flex-col">
-                        <h3 className="text-lg font-semibold mb-4 flex-shrink-0">
-                          {analyticsData.tableData.title}
-                        </h3>
-                        <div className="flex-1 overflow-auto">
-                          <table className="w-full border-collapse border border-border">
-                            <thead className="sticky top-0 bg-background">
-                              <tr className="bg-muted">
-                                {analyticsData.tableData.headers.map((header, index) => (
-                                  <th
-                                    key={index}
-                                    className="border border-border px-4 py-3 text-left font-medium"
-                                  >
-                                    {header}
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {analyticsData.tableData.rows.map((row, rowIndex) => (
-                                <tr key={rowIndex} className="hover:bg-muted/50">
-                                  {row.map((cell, cellIndex) => (
-                                    <td key={cellIndex} className="border border-border px-4 py-3">
-                                      {cell}
-                                    </td>
-                                  ))}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                      <div className="h-full">
+                        <SimpleTable
+                          data={
+                            analyticsData.tableData.data && analyticsData.tableData.data.length > 0
+                              ? analyticsData.tableData.data
+                              : analyticsData.tableData.rows.map((row) => {
+                                  const obj: Record<string, any> = {};
+                                  analyticsData.tableData!.headers.forEach(
+                                    (header, headerIndex) => {
+                                      obj[header] = row[headerIndex];
+                                    }
+                                  );
+                                  return obj;
+                                })
+                          }
+                          headers={analyticsData.tableData.headers}
+                          title={analyticsData.tableData.title}
+                        />
                       </div>
                     </TabsContent>
                   )}

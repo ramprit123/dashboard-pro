@@ -97,13 +97,17 @@ export function useChat() {
       return data;
     },
     onSuccess: (data) => {
-      // Add bot response to chat (simplified for left panel)
+      // Add bot response to chat with analytics data
       const botMessage: Message = {
         id: data.id,
         message: data.message,
         timestamp: data.timestamp,
         isUser: false,
         conversationId: data.conversationId,
+        chartData: data.chartData,
+        tableData: data.tableData,
+        kpis: data.kpis,
+        originalQuery: data.originalQuery,
       };
       addMessage(botMessage);
 

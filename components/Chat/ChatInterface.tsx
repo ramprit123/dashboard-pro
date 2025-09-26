@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 export function ChatInterface() {
   const { messages, isLoading, sendMessage } = useChat();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleQuerySelect = async (query: string) => {
     try {
@@ -18,11 +19,21 @@ export function ChatInterface() {
     }
   };
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
-  }, [messages]);
+    const scrollToBottom = () => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+      }
+    };
+
+    // Small delay to ensure DOM is updated
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeoutId);
+  }, [messages, isLoading]);
 
   return (
     <div className="h-full flex flex-col">
@@ -42,9 +53,12 @@ export function ChatInterface() {
           {isLoading && (
             <div className="flex items-center space-x-2 text-muted-foreground">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-              <span>Thinking...</span>
+              <span>Analyzing call center data...</span>
             </div>
           )}
+
+          {/* Invisible element to scroll to */}
+          <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
     </div>
