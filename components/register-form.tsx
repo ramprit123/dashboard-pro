@@ -3,7 +3,7 @@ import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
 import { Label } from '@/components/UI/label';
 
-export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'form'>) {
+export function RegisterForm({ className, ...props }: React.ComponentPropsWithoutRef<'form'>) {
   return (
     <form className={cn('flex flex-col gap-6', className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">

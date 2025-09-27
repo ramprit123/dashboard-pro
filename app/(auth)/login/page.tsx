@@ -1,7 +1,7 @@
 'use client';
-import { GalleryVerticalEnd } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { LoginForm } from '@/components/login-form';
+import { motion } from 'framer-motion';
+import { GalleryVerticalEnd } from 'lucide-react';
 
 export default function LoginPage() {
   return (
