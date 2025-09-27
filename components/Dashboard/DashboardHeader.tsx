@@ -11,7 +11,6 @@ import {
 import { Download, Edit, Save, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useDashboard } from '@/hooks/useDashboard';
-import { UserProfile } from '@/components/user-profile';
 
 export function DashboardHeader() {
   const router = useRouter();
@@ -55,7 +54,6 @@ export function DashboardHeader() {
               <Plus className="h-4 w-4 mr-2" />
               New
             </Button>
-            <UserProfile />
           </div>
         </div>
       </div>
