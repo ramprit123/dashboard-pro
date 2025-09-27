@@ -77,6 +77,12 @@ export class OpenRouterClient {
 
         if (!response.ok) {
           const errorText = await response.text().catch(() => 'Unknown error');
+          console.error('OpenRouter API Error Details:', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            body: errorText,
+          });
           throw new Error(
             `OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`
           );

@@ -112,40 +112,19 @@ export async function POST(request: NextRequest) {
           throw new Error('No response from AI');
         }
       } catch (openRouterError) {
-        console.warn('OpenRouter failed, using fallback:', openRouterError);
+        console.error('OpenRouter API Error:', openRouterError);
+        // Use fallback response based on the message
         analyticsResponse = {
-          textResponse: `I understand you're asking: "${message}". However, I'm currently experiencing connectivity issues with the AI service. Please try again in a moment.`,
+          textResponse: createFallbackResponse(message, dataContext),
         };
       }
     } else {
       // For call center data queries, always use local analysis with chart/table generation
       analyticsResponse = generateChartAndTableData(message, callCenterAnalytics);
 
-      // Debug logging
-      // console.log('Generated analytics response:', {
-      //   hasChartData: !!analyticsResponse.chartData,
-      //   hasTableData: !!analyticsResponse.tableData,
-      //   tableDataLength: analyticsResponse.tableData?.data?.length || 0,
-      //   tableHeaders: analyticsResponse.tableData?.headers || [],
-      // });
-
-      // Optionally enhance with AI if available
-      if (apiKey) {
-        try {
-          const client = new OpenRouterClient(apiKey);
-          const messages = createCartAnalysisPrompt(dataContext, message);
-          const response = await client.createChatCompletion(messages);
-
-          if ('choices' in response && response.choices.length > 0) {
-            // Combine AI response with chart/table data
-            analyticsResponse.textResponse = response.choices[0].message.content;
-            usage = response.usage;
-          }
-        } catch (openRouterError) {
-          console.warn('OpenRouter failed, using local analysis:', openRouterError);
-          // Keep the local analysis response
-        }
-      }
+      // The local analysis already provides comprehensive responses with charts and tables
+      // No need to call OpenRouter for call center data queries as we have all the data locally
+      console.log('Using local call center analytics for query:', message);
     }
 
     const chatResponse = {
