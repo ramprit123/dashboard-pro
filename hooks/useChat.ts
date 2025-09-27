@@ -33,6 +33,7 @@ interface Message {
   chartData?: ChartData;
   tableData?: TableData;
   kpis?: KPI[];
+  originalQuery?: string;
 }
 
 interface ChatState {

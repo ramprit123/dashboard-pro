@@ -58,7 +58,7 @@ export function DataTable({ data, headers, title, className }: DataTableProps) {
   // Get unique values for each column for filter dropdowns
   const getUniqueValues = (columnKey: string) => {
     const values = data.map((row) => String(row[columnKey] || '')).filter(Boolean);
-    return [...new Set(values)].sort();
+    return Array.from(new Set(values)).sort();
   };
 
   // Sort data
