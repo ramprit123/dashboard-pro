@@ -1,13 +1,12 @@
 'use client';
-import { Logo } from '@/components/logo';
-import Link from 'next/link';
-import { useState } from 'react';
 import { Button } from '@/components/UI/button';
-import { Menu, X, ArrowRight, MessageSquare, BarChart3 } from 'lucide-react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/UI/ThemeToggle';
+import { motion } from 'framer-motion';
+import { ArrowRight, BarChart3, GalleryVerticalEnd, Menu, MessageSquare, X } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const menuItems = [
   { name: 'Features', href: '#' },
@@ -44,9 +43,12 @@ export default function HeroSection() {
           <div className="m-auto max-w-full container px-6">
             <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
               <div className="flex w-full justify-between lg:w-auto">
-                <Link href="/" aria-label="home" className="flex items-center space-x-2">
-                  <Image src={'/logoipsum.png'} alt="logo" height={100} width={160} />
-                </Link>
+                <a href="#" className="flex items-center gap-2 font-medium">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                    <GalleryVerticalEnd className="size-4" />
+                  </div>
+                  Anabot Pro.
+                </a>
 
                 <div className="flex items-center gap-4">
                   <div className="lg:hidden">
@@ -84,7 +86,7 @@ export default function HeroSection() {
                     <ThemeToggle />
                   </div>
                   <Button asChild variant="outline" size="sm">
-                    <Link href="#">
+                    <Link href="/login">
                       <span>Login</span>
                     </Link>
                   </Button>
