@@ -3,7 +3,7 @@ import { RegisterForm } from '@/components/register-form';
 import { motion } from 'framer-motion';
 import { GalleryVerticalEnd } from 'lucide-react';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <div className="min-h-screen w-full lg:grid lg:grid-cols-2 bg-[#f5f5f5]">
       <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-8 lg:p-10">

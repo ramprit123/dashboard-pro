@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/UI/ThemeProvider';
 import { ReactQueryProvider } from '@/components/UI/ReactQueryProvider';
+import { SessionProvider } from '@/components/providers/session-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,7 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <ReactQueryProvider>{children}</ReactQueryProvider>
+          <ReactQueryProvider>
+            <SessionProvider>{children}</SessionProvider>
+          </ReactQueryProvider>
         </ThemeProvider>
       </body>
     </html>
