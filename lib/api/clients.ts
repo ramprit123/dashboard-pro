@@ -10,12 +10,9 @@ export class APIClient {
     };
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
       ...options,
       headers: {
@@ -26,16 +23,16 @@ export class APIClient {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
       }
-      
+
       return response.text() as any;
     } catch (error) {
       console.error(`API request failed: ${url}`, error);
@@ -79,7 +76,6 @@ export const chatAPI = {
 export const dashboardAPI = {
   getAll: () => apiClient.get('/dashboards'),
   save: (dashboard: any) => apiClient.post('/dashboards', dashboard),
-  update: (id: string, dashboard: any) =>
-    apiClient.put(`/dashboards/${id}`, dashboard),
+  update: (id: string, dashboard: any) => apiClient.put(`/dashboards/${id}`, dashboard),
   delete: (id: string) => apiClient.delete(`/dashboards/${id}`),
 };
